@@ -5,7 +5,7 @@ save_model_path: model_weights/model_weights.pt
 
 dataset:
   root: ../data # for GCP - use "data/""
-  dataset: FashionMNIST # for VAE purposes
+  dataset: FashionMNIST # for VAE purposes or Flowers102
 
 train:
   epochs: 2

@@ -40,9 +40,9 @@ class EncoderDecoder(nn.Module):
                 nn.ReLU(),
             )
 
-        if cfg_obj["dataset"] == "ImageNet":
+        if cfg_obj["dataset"] == "Flowers102":
 
-            # in the case of ImageNet, which are 3x224x224 images, we do conv layers then flatten
+            # in the case of Flowers102, which are 3x224x224 images, we do conv layers then flatten
 
             self.encoder = nn.Sequential(
                 nn.Conv2d(3, 64, 3), # 222
@@ -90,7 +90,7 @@ class EncoderDecoder(nn.Module):
         if self.cfg_obj["dataset"] == "FashionMNIST": 
             decoded = self.decoder(encoded)
 
-        if self.cfg_obj['dataset'] == "ImageNet":
+        if self.cfg_obj['dataset'] == "Flowers102":
             decoded = self.decoder_linear(encoded)
             decoded = decoded.reshape(-1, 2, 212, 212)
             decoded = self.decoder_conv(decoded)
@@ -152,9 +152,9 @@ class VAE(nn.Module):
                 nn.ReLU(),
             )
 
-        if cfg_obj["dataset"] == "ImageNet":
+        if cfg_obj["dataset"] == "Flowers102":
 
-            # in the case of ImageNet, which are 3x224x224 images, we do conv layers then flatten
+            # in the case of Flowers102, which are 3x224x224 images, we do conv layers then flatten
 
             self.encoder = nn.Sequential(
                 nn.Conv2d(3, 64, 3), # 222
@@ -219,7 +219,7 @@ class VAE(nn.Module):
             decoded = self.decoder(z)
             decoded = decoded.reshape(-1, 1, 28, 28)
 
-        if self.cfg_obj['dataset'] == "ImageNet":
+        if self.cfg_obj['dataset'] == "Flowers102":
             decoded = self.decoder_linear(z)
             decoded = decoded.reshape(-1, 2, 212, 212)
             decoded = self.decoder_conv(decoded)
@@ -249,7 +249,7 @@ if __name__ == "__main__":
     
     X = torch.tensor(X)
 
-    cfg_obj = {"dataset": "ImageNet"}
+    cfg_obj = {"dataset": "Flowers102"}
     model = EncoderDecoder(cfg_obj = cfg_obj)
     
     summary(model, (3, 224, 224))
