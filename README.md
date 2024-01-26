@@ -6,21 +6,24 @@ Just a simple implementation based on the VAE which seems to be an important thi
 ## What has been done 
 1. Set up the Architecture
 1. Set up loss function
+1. Set up the dataset and dataloader 
+1. Set up the training, which could be better implemented admittedly.
+1. Set up validation to get validation loss.
+1. Results visualisation
 
 ## What else needs to be done
-1. Set up the dataset and dataloader (mainly imagenet side)
-1. Set up the training, which could be better implemented admittedly.
-1. Set up validation, but only takes accuracy and loss. 
-1. Results visualisation
-1. Remove hardcoded weights
+1. Nil
 
 ## How to run 
 
-Make sure you change the directory of your data. I used the FashionMNIST and ImageNet. 
+Make sure you change the directory of your data. I used the FashionMNIST and Flowers102. 
 
 ```
 python -m src.main
 ```
+
+## Visualisation
+Go to ./notebooks/model_out.ipynb to see how the model turned out.  
 
 ## Resources
 
