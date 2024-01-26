@@ -41,6 +41,8 @@ def validation(model, val_set, cfg_obj):
 
     print (f"Validation Loss: {sum(losses)/len(losses)}")
 
+    return sum(losses)/len(losses)
+
 
 if __name__ == "__main__":
     

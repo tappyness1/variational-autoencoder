@@ -9,19 +9,20 @@ hydra:
   sweeper:
     sampler:
       seed: 123
-    direction: maximize
+    direction: minimize
     study_name: "vision"
     storage: null
     n_trials: 3
     n_jobs: 1
     params:
-      train.epochs: choice(1,2)
+      train.epochs: choice(1,2,5,10)
       train.lr: choice(0.0002, 3e-4)
+      train.weight_decay: choice(5e-3, 5e-4)
 
 train:
   epochs: 3
   lr: 3e-4
-  weight_decay: 5e-5
+  weight_decay: 5e-3
 
 save_model_path: model_weights/model_weights.pt
 in_channels: 3
