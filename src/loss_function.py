@@ -49,15 +49,17 @@ def kl_divergence(mean, log_var, z):
 def elbo_loss(mean, log_var, z, log_scale, decoded, dataset, x):
     r_loss = recon_loss(log_scale, decoded, dataset, x)
     kl_loss = kl_divergence(mean, log_var, z)
+
     return (kl_loss + r_loss).mean()
 
 if __name__ == "__main__":
     from src.model import VAE
     from src.dataset import get_load_data
 
-    cfg_obj = {"dataset": "Flowers102"}
-    dataset = cfg_obj['dataset']
+    cfg_obj = {"dataset": {"dataset":"Flowers102"}}
+    dataset = cfg_obj['dataset']['dataset']
     vae_model = VAE(cfg_obj)
+    
     train, test = get_load_data(root = "../data", dataset = dataset, download = False)
       
     img, label = train[0] 

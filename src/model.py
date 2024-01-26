@@ -118,7 +118,7 @@ class VAE(nn.Module):
         # for numerical stability, we will obtain the log variance instead
         # read more here - https://stats.stackexchange.com/questions/353220/why-in-variational-auto-encoder-gaussian-variational-family-we-model-log-sig
 
-        if cfg_obj["dataset"] == "FashionMNIST":
+        if cfg_obj["dataset"]['dataset'] == "FashionMNIST":
 
             # in the case of FashionMNIST, which are 28x28 images, we do linear layers
             self.encoder = nn.Sequential(
@@ -152,7 +152,7 @@ class VAE(nn.Module):
                 nn.ReLU(),
             )
 
-        if cfg_obj["dataset"] == "Flowers102":
+        if cfg_obj["dataset"]['dataset'] == "Flowers102":
 
             # in the case of Flowers102, which are 3x224x224 images, we do conv layers then flatten
 
@@ -207,7 +207,7 @@ class VAE(nn.Module):
         return mean + eps*std
 
     def forward(self, input):
-        if self.cfg_obj["dataset"] == "FashionMNIST": 
+        if self.cfg_obj["dataset"]['dataset'] == "FashionMNIST": 
             input = input.reshape(-1, 28*28)
         
         encoded = self.encoder(input)
@@ -215,11 +215,11 @@ class VAE(nn.Module):
         log_var = self.FC_logvar(encoded)
         z = self.reparameterise(mean, log_var)
         
-        if self.cfg_obj["dataset"] == "FashionMNIST": 
+        if self.cfg_obj["dataset"]['dataset'] == "FashionMNIST": 
             decoded = self.decoder(z)
             decoded = decoded.reshape(-1, 1, 28, 28)
 
-        if self.cfg_obj['dataset'] == "Flowers102":
+        if self.cfg_obj["dataset"]['dataset'] == "Flowers102":
             decoded = self.decoder_linear(z)
             decoded = decoded.reshape(-1, 2, 212, 212)
             decoded = self.decoder_conv(decoded)
@@ -249,7 +249,7 @@ if __name__ == "__main__":
     
     X = torch.tensor(X)
 
-    cfg_obj = {"dataset": "Flowers102"}
+    cfg_obj = {"dataset": {"dataset":"Flowers102"}}
     model = EncoderDecoder(cfg_obj = cfg_obj)
     
     summary(model, (3, 224, 224))
