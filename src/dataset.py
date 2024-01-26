@@ -84,4 +84,4 @@ if __name__ == "__main__":
     # print (smnt)
 
     # # for gcp or whatever
-    train, test = get_load_data(root = "../data", dataset = "Flowers102", download = True)
+    train, test = get_load_data(root = "../data", dataset = "FashionMNIST", download = True)

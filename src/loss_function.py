@@ -22,6 +22,7 @@ def recon_loss(logscale, decoded, dataset, x):
 
     if dataset == "FashionMNIST":
         # need to use BCE loss here
+        # having assertion error where `input_val >= zero && input_val <= one` on FashionMNIST set
         bce_loss = torch.nn.BCELoss(reduction='sum')
         return bce_loss(decoded, x)
 
@@ -56,7 +57,7 @@ if __name__ == "__main__":
     from src.model import VAE
     from src.dataset import get_load_data
 
-    cfg_obj = {"dataset": {"dataset":"Flowers102"}}
+    cfg_obj = {"dataset": {"dataset":"FashionMNIST"}}
     dataset = cfg_obj['dataset']['dataset']
     vae_model = VAE(cfg_obj)
     

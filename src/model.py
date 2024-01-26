@@ -172,13 +172,13 @@ class VAE(nn.Module):
                 nn.Flatten(), # 2*212*212 = 89888
                 nn.Linear(89888, 1024),
                 nn.ReLU(),
-                nn.Linear(1024, 256),
+                nn.Linear(1024, 20),
             )
-            self.FC_mean = nn.Linear(256 , 256)
-            self.FC_logvar = nn.Linear(256 , 256)
+            self.FC_mean = nn.Linear(20 , 20)
+            self.FC_logvar = nn.Linear(20 , 20)
 
             self.decoder_linear = nn.Sequential(
-                nn.Linear(256, 1024),
+                nn.Linear(20, 1024),
                 nn.ReLU(),
                 nn.Linear(1024, 89888),
                 nn.ReLU()

@@ -34,7 +34,6 @@ def train(train_set, cfg):
         # for i in tqdm(range(X.shape[0])):
         with tqdm(train_dataloader) as tepoch:
             for imgs, classes in tepoch:
-                # print (imgs.shape)
                 imgs = imgs.to(device)
                 
                 mean, log_var, z, decoded = model(imgs)
@@ -55,8 +54,8 @@ if __name__ == "__main__":
     torch.manual_seed(42)
 
     cfg = {"save_model_path": "model_weights/model_weights.pt",
-           'show_model_summary': True, 
-           'train': {"epochs": 1, 'lr': 0.005, 'weight_decay': 5e-3},
+           'show_model_summary': False, 
+           'train': {"epochs": 3, 'lr': 0.005, 'weight_decay': 5e-3},
            'dataset': {"dataset": "Flowers102"}}
 
     train_set, _ = get_load_data(root = "../data", dataset = cfg['dataset']['dataset'])

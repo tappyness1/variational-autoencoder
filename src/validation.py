@@ -25,13 +25,12 @@ def validation(model, val_set, cfg_obj):
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
     model = model.to(device)
-    weight = weight.to(device)
 
     losses = []
 
     with tqdm(val_dataloader) as tepoch:
 
-        for imgs in tepoch:
+        for imgs, _ in tepoch:
             imgs = imgs.to(device)
             with torch.no_grad():
                 mean, log_var, z, decoded = model(imgs)

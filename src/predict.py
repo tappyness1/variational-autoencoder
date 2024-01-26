@@ -6,5 +6,5 @@ def inference(model, imgs):
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model.eval()
     model.to(device)
-    output = model(imgs)
-    return output
+    _, _, _, decoded = model(imgs)
+    return decoded
