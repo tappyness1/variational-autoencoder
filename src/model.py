@@ -7,7 +7,7 @@ class EncoderDecoder(nn.Module):
     def __init__(self, cfg_obj):
         super(EncoderDecoder, self).__init__()
         self.cfg_obj = cfg_obj
-        if cfg_obj["dataset"] == "FashionMNIST":
+        if cfg_obj["dataset"]['dataset'] == "FashionMNIST":
 
             # in the case of FashionMNIST, which are 28x28 images, we do linear layers
             self.encoder = nn.Sequential(
@@ -40,7 +40,7 @@ class EncoderDecoder(nn.Module):
                 nn.ReLU(),
             )
 
-        if cfg_obj["dataset"] == "Flowers102":
+        if cfg_obj["dataset"]['dataset'] == "Flowers102":
 
             # in the case of Flowers102, which are 3x224x224 images, we do conv layers then flatten
 
@@ -87,10 +87,10 @@ class EncoderDecoder(nn.Module):
         
         encoded = self.encoder(input)
         
-        if self.cfg_obj["dataset"] == "FashionMNIST": 
+        if self.cfg_obj["dataset"]['dataset'] == "FashionMNIST": 
             decoded = self.decoder(encoded)
 
-        if self.cfg_obj['dataset'] == "Flowers102":
+        if self.cfg_obj["dataset"]['dataset'] == "Flowers102":
             decoded = self.decoder_linear(encoded)
             decoded = decoded.reshape(-1, 2, 212, 212)
             decoded = self.decoder_conv(decoded)
