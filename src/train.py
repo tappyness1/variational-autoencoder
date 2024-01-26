@@ -35,10 +35,12 @@ def train(train_set, cfg):
         with tqdm(train_dataloader) as tepoch:
             for imgs, classes in tepoch:
                 # print (imgs.shape)
-
-                optimizer.zero_grad() 
+                imgs = imgs.to(device)
+                
                 mean, log_var, z, decoded = model(imgs)
                 loss = elbo_loss(mean, log_var, z, model.log_scale, decoded, dataset, imgs)
+                
+                optimizer.zero_grad() 
                 loss.backward()
                 optimizer.step()
                 tepoch.set_postfix(loss=loss.item())
