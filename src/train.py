@@ -26,7 +26,7 @@ def train(train_set, cfg):
     if cfg['show_model_summary']:
         summary(model, (3,224,224))
 
-    train_dataloader = DataLoader(train_set, batch_size=5, shuffle = True)
+    train_dataloader = DataLoader(train_set, batch_size=4096, shuffle = True)
     dataset = cfg['dataset']['dataset']
     
     for epoch in range(cfg['train']['epochs']):
@@ -53,13 +53,20 @@ if __name__ == "__main__":
 
     torch.manual_seed(42)
 
-    cfg = {"save_model_path": "model_weights/model_weights.pt",
+    cfg = {"save_model_path": "model_weights/vae_fmnist.pt",
            'show_model_summary': False, 
-           'train': {"epochs": 3, 'lr': 0.005, 'weight_decay': 5e-3},
-           'dataset': {"dataset": "Flowers102"}}
+           'train': {"epochs": 50, 'lr': 0.001, 'weight_decay': 5e-3},
+           'dataset': {"dataset": "FashionMNIST"}}
+
+    # cfg = {"save_model_path": "model_weights/vae_flowers.pt",
+    #        'show_model_summary': False, 
+    #        'train': {"epochs": 3, 'lr': 0.005, 'weight_decay': 5e-3},
+    #        'dataset': {"dataset": "Flowers102"}}  
 
     train_set, _ = get_load_data(root = "../data", dataset = cfg['dataset']['dataset'])
     train(train_set = train_set, cfg = cfg)
+
+    
 
     # cannot use FashionMNIST because size needs to be 224x224x3 at the very least
     # train_set, test_set = get_load_data(root = "../data", dataset = "FashionMNIST")

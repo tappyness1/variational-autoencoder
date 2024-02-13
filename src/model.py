@@ -149,7 +149,7 @@ class VAE(nn.Module):
                 nn.Linear(32, 64),
                 nn.ReLU(),
                 nn.Linear(64, 28*28),
-                nn.ReLU(),
+                nn.Sigmoid(), # used to be relu but sigmoid ensures that the output is between 0 and 1
             )
 
         if cfg_obj["dataset"]['dataset'] == "Flowers102":
