@@ -21,8 +21,7 @@ def recon_loss(logscale, decoded, dataset, x):
         # return - mse_loss
 
     if dataset == "FashionMNIST":
-        # need to use BCE loss here
-        # having assertion error where `input_val >= zero && input_val <= one` on FashionMNIST set
+        # should be using MSE Loss here because FashionMNIST is a grayscale image
         bce_loss = torch.nn.BCELoss(reduction='sum')
         return bce_loss(decoded, x)
 
