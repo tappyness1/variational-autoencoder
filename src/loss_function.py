@@ -17,13 +17,17 @@ def recon_loss(logscale, decoded, dataset, x):
         # # https://ai.stackexchange.com/questions/27341/in-variational-autoencoders-why-do-people-use-mse-for-the-loss
     
         # mse = torch.nn.MSELoss(reduction='sum')
-        # mse_loss = mse(decoded, mean)
+        # mse_loss = mse(decoded, x)
         # return - mse_loss
 
     if dataset == "FashionMNIST":
         # should be using MSE Loss here because FashionMNIST is a grayscale image
-        bce_loss = torch.nn.BCELoss(reduction='sum')
-        return bce_loss(decoded, x)
+        # bce_loss = torch.nn.BCELoss(reduction='sum')
+
+        # return bce_loss(decoded, x)
+
+        mse = torch.nn.MSELoss(reduction='sum')
+        return mse(decoded, x)
 
 def kl_divergence(mean, log_var, z):
     # KL divergence between the latent distribution and the prior
