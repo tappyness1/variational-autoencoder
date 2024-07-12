@@ -66,8 +66,6 @@ if __name__ == "__main__":
     train_set, _ = get_load_data(root = "../data", dataset = cfg['dataset']['dataset'])
     train(train_set = train_set, cfg = cfg)
 
-    
-
     # cannot use FashionMNIST because size needs to be 224x224x3 at the very least
     # train_set, test_set = get_load_data(root = "../data", dataset = "FashionMNIST")
     # train(epochs = 1, train_set = train_set, in_channels = 1, num_classes = 10)
