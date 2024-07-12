@@ -22,7 +22,7 @@ def recon_loss(logscale, decoded, dataset, x):
 
     if dataset == "FashionMNIST":
         # should be using MSE Loss here because FashionMNIST is a grayscale image
-        # bce_loss = torch.nn.BCELoss(reduction='sum')
+        # bce_loss = torch.nn.BCEwithLogitsLoss(reduction='sum')
 
         # return bce_loss(decoded, x)
 

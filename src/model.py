@@ -2,109 +2,11 @@ from torch.nn import Conv2d, ReLU, MaxPool2d, ConvTranspose2d, BatchNorm2d, Adap
 import torch.nn as nn
 import torch
 import numpy as np
-    
-class EncoderDecoder(nn.Module):
-    def __init__(self, cfg_obj):
-        super(EncoderDecoder, self).__init__()
-        self.cfg_obj = cfg_obj
-        if cfg_obj["dataset"]['dataset'] == "FashionMNIST":
 
-            # in the case of FashionMNIST, which are 28x28 images, we do linear layers
-            self.encoder = nn.Sequential(
-                nn.Linear(28*28, 64),
-                nn.ReLU(),
-                nn.Linear(64, 32),
-                nn.ReLU(),
-                nn.Linear(32, 16),
-                nn.ReLU(),
-                nn.Linear(16, 8),
-                nn.ReLU(),
-                nn.Linear(8, 4),
-                nn.ReLU(),
-                nn.Linear(4, 2),
-                nn.ReLU(),
-            )
-
-            self.decoder = nn.Sequential(
-                nn.Linear(2, 4),
-                nn.ReLU(),
-                nn.Linear(4, 8),
-                nn.ReLU(),
-                nn.Linear(8, 16),
-                nn.ReLU(),
-                nn.Linear(16, 32),
-                nn.ReLU(),
-                nn.Linear(32, 64),
-                nn.ReLU(),
-                nn.Linear(64, 28*28),
-                nn.ReLU(),
-            )
-
-        if cfg_obj["dataset"]['dataset'] == "Flowers102":
-
-            # in the case of Flowers102, which are 3x224x224 images, we do conv layers then flatten
-
-            self.encoder = nn.Sequential(
-                nn.Conv2d(3, 64, 3), # 222
-                nn.ReLU(),
-                nn.Conv2d(64, 32, 3), # 220
-                nn.ReLU(),
-                nn.Conv2d(32, 16, 3), # 218
-                nn.ReLU(),
-                nn.Conv2d(16, 8, 3), # 216
-                nn.ReLU(),
-                nn.Conv2d(8, 4, 3), # 214
-                nn.ReLU(),
-                nn.Conv2d(4, 2, 3), # 212
-                nn.ReLU(),
-                nn.Flatten(), # 2*212*212 = 89888
-                nn.Linear(89888, 1024),
-                nn.ReLU(),
-                nn.Linear(1024, 256),
-                nn.ReLU()
-            )
-            self.decoder_linear = nn.Sequential(
-                nn.Linear(256, 1024),
-                nn.ReLU(),
-                nn.Linear(1024, 89888),
-                nn.ReLU()
-            )
-            self.decoder_conv = nn.Sequential(
-                nn.ConvTranspose2d(2, 4, 3), # 214
-                nn.ReLU(),
-                nn.ConvTranspose2d(4, 8, 3), # 216
-                nn.ReLU(),
-                nn.ConvTranspose2d(8, 16, 3), # 218
-                nn.ReLU(),  
-                nn.ConvTranspose2d(16, 32, 3), # 220
-                nn.ReLU(),
-                nn.ConvTranspose2d(32, 64, 3), # 222
-                nn.ReLU(),
-                nn.ConvTranspose2d(64, 3, 3), # 224
-            )
-
-    def forward(self, input):
-        
-        encoded = self.encoder(input)
-        
-        if self.cfg_obj["dataset"]['dataset'] == "FashionMNIST": 
-            decoded = self.decoder(encoded)
-
-        if self.cfg_obj["dataset"]['dataset'] == "Flowers102":
-            decoded = self.decoder_linear(encoded)
-            decoded = decoded.reshape(-1, 2, 212, 212)
-            decoded = self.decoder_conv(decoded)
-        
-        return encoded, decoded
-
-class Model(nn.Module):
-    def __init__(self, cfg_obj):
-        self.encoder_decoder = EncoderDecoder()
-
-    def forward(self, input):
-        encoded, decoded = self.encoder_decoder(input)
-        
-        return encoded, decoded
+def reparameterise(mean, log_var):
+    std = torch.exp(0.5*log_var)
+    eps = torch.randn_like(std)
+    return mean + eps*std
 
 class VAE(nn.Module):
     def __init__(self, cfg_obj):
@@ -119,123 +21,94 @@ class VAE(nn.Module):
         # read more here - https://stats.stackexchange.com/questions/353220/why-in-variational-auto-encoder-gaussian-variational-family-we-model-log-sig
 
         if cfg_obj["dataset"]['dataset'] == "FashionMNIST":
-
-            # in the case of FashionMNIST, which are 28x28 images, we do linear layers
-            self.encoder = nn.Sequential(
-                nn.Linear(28*28, 64),
-                nn.ReLU(),
-                nn.Linear(64, 32),
-                nn.ReLU(),
-                nn.Linear(32, 16),
-                nn.ReLU(),
-                nn.Linear(16, 8),
-                nn.ReLU(),
-                nn.Linear(8, 4),
-                nn.ReLU(),
-                nn.Linear(4, 2)
-            )
-            self.FC_mean = nn.Linear(2 , 2)
-            self.FC_logvar = nn.Linear(2 , 2)
-
-            self.decoder = nn.Sequential(
-                nn.Linear(2, 4),
-                nn.ReLU(),
-                nn.Linear(4, 8),
-                nn.ReLU(),
-                nn.Linear(8, 16),
-                nn.ReLU(),
-                nn.Linear(16, 32),
-                nn.ReLU(),
-                nn.Linear(32, 64),
-                nn.ReLU(),
-                nn.Linear(64, 28*28),
-                nn.Sigmoid(), # used to be relu but sigmoid ensures that the output is between 0 and 1
-            )
+            self.encoder_decoder = EncoderDecoderFMNIST()
 
         if cfg_obj["dataset"]['dataset'] == "Flowers102":
-
             # in the case of Flowers102, which are 3x224x224 images, we do conv layers then flatten
+            self.encoder_decoder = EncoderDecoderFlowers102()
 
-            self.encoder = nn.Sequential(
-                nn.Conv2d(3, 64, 3), # 222
-                nn.ReLU(),
-                nn.Conv2d(64, 32, 3), # 220
-                nn.ReLU(),
-                nn.Conv2d(32, 16, 3), # 218
-                nn.ReLU(),
-                nn.Conv2d(16, 8, 3), # 216
-                nn.ReLU(),
-                nn.Conv2d(8, 4, 3), # 214
-                nn.ReLU(),
-                nn.Conv2d(4, 2, 3), # 212
-                nn.ReLU(),
-                nn.Flatten(), # 2*212*212 = 89888
-                nn.Linear(89888, 1024),
-                nn.ReLU(),
-                nn.Linear(1024, 20),
-            )
-            self.FC_mean = nn.Linear(20 , 20)
-            self.FC_logvar = nn.Linear(20 , 20)
-
-            self.decoder_linear = nn.Sequential(
-                nn.Linear(20, 1024),
-                nn.ReLU(),
-                nn.Linear(1024, 89888),
-                nn.ReLU()
-            )
-            self.decoder_conv = nn.Sequential(
-                nn.ConvTranspose2d(2, 4, 3), # 214
-                nn.ReLU(),
-                nn.ConvTranspose2d(4, 8, 3), # 216
-                nn.ReLU(),
-                nn.ConvTranspose2d(8, 16, 3), # 218
-                nn.ReLU(),  
-                nn.ConvTranspose2d(16, 32, 3), # 220
-                nn.ReLU(),
-                nn.ConvTranspose2d(32, 64, 3), # 222
-                nn.ReLU(),
-                nn.ConvTranspose2d(64, 3, 3), # 224
-            )
-            # some papers say that your sigma can be a trainable parameter
-            # some say you can just set it to 1 or any number you want. 
-            # I'm a sheep so here we go.
-        self.log_scale = nn.Parameter(torch.Tensor([0.0]))
-
-    def reparameterise(self, mean, log_var):
-        std = torch.exp(0.5*log_var)
-        eps = torch.randn_like(std)
-        return mean + eps*std
+        # some papers say that your sigma can be a trainable parameter
+        # some say you can just set it to 1 or any number you want. 
+        self.log_scale = nn.Parameter(torch.Tensor([1.0]))
 
     def forward(self, input):
-        if self.cfg_obj["dataset"]['dataset'] == "FashionMNIST": 
-            input = input.reshape(-1, 28*28)
-        
+
+        return self.encoder_decoder(input)
+    
+class EncoderDecoderFMNIST(nn.Module):
+    def __init__(self):
+        super(EncoderDecoderFMNIST, self).__init__()
+        relu = nn.ReLU()
+        encoder_params = [28*28, 64, 32, 16, 8, 4, 2]
+        self.encoder = nn.Sequential()
+        for i in range(len(encoder_params)-1):
+            self.encoder.add_module(f"encoder_{i}", nn.Linear(encoder_params[i], encoder_params[i+1]))
+            self.encoder.add_module(f"encoder_relu_{i}", relu)
+
+        self.decoder = nn.Sequential()
+        for i in range(len(encoder_params)-1, 0, -1):
+            self.decoder.add_module(f"decoder_{i}", nn.Linear(encoder_params[i], encoder_params[i-1]))
+            self.decoder.add_module(f"decoder_relu_{i}", relu)
+
+        self.FC_mean = nn.Linear(2 , 2)
+        self.FC_logvar = nn.Linear(2 , 2)
+
+    def forward(self, input):
+        input = input.reshape(-1, 28*28)
         encoded = self.encoder(input)
         mean = self.FC_mean(encoded)
         log_var = self.FC_logvar(encoded)
-        z = self.reparameterise(mean, log_var)
-        
-        if self.cfg_obj["dataset"]['dataset'] == "FashionMNIST": 
-            decoded = self.decoder(z)
-            decoded = decoded.reshape(-1, 1, 28, 28)
 
-        if self.cfg_obj["dataset"]['dataset'] == "Flowers102":
-            decoded = self.decoder_linear(z)
-            decoded = decoded.reshape(-1, 2, 212, 212)
-            decoded = self.decoder_conv(decoded)
+        z = reparameterise(mean, log_var)
+
+        decoded = self.decoder(z)
+        decoded = decoded.reshape(-1, 1, 28, 28)
+        return mean, log_var, z, decoded
+    
+class EncoderDecoderFlowers102(nn.Module):
+    def __init__(self) -> None:
+        super(EncoderDecoderFlowers102, self).__init__()
+        relu = nn.ReLU()
+
+        self.encoder = nn.Sequential()
+        encoder_conv_params = [3,64,32,16,8,4,2]
+        encoder_lin_params = [89888, 1024, 20]
+
+        for i in range(len(encoder_conv_params)-1):
+            self.encoder.add_module(f"encoder_{i}", nn.Conv2d(encoder_conv_params[i], encoder_conv_params[i+1], 3))
+            self.encoder.add_module(f"encoder_relu_{i}", relu)
+
+        self.encoder.add_module("flatten", nn.Flatten())
+
+        for i in range(len(encoder_lin_params)-1):
+            self.encoder.add_module(f"encoder_lin_{i}", nn.Linear(encoder_lin_params[i], encoder_lin_params[i+1]))
+            self.encoder.add_module(f"encoder_lin_relu_{i}", relu)
+
+        self.FC_mean = nn.Linear(20 , 20)
+        self.FC_logvar = nn.Linear(20 , 20)
+
+        self.decoder_linear = nn.Sequential()
+        for i in range(len(encoder_lin_params)-1, 0, -1):
+            self.decoder_linear.add_module(f"decoder_lin_{i}", nn.Linear(encoder_lin_params[i], encoder_lin_params[i-1]))
+            self.decoder_linear.add_module(f"decoder_lin_relu_{i}", relu)
+        
+        self.decoder_conv = nn.Sequential()
+        for i in range(len(encoder_conv_params)-1, 0, -1):
+            self.decoder_conv.add_module(f"decoder_{i}", nn.ConvTranspose2d(encoder_conv_params[i], encoder_conv_params[i-1], 3))
+            self.decoder_conv.add_module(f"decoder_relu_{i}", relu)
+
+    def forward(self, input):        
+            
+        encoded = self.encoder(input)
+        mean = self.FC_mean(encoded)
+        log_var = self.FC_logvar(encoded)
+        z = reparameterise(mean, log_var)
+
+        decoded = self.decoder_linear(z)
+        decoded = decoded.reshape(-1, 2, 212, 212)
+        decoded = self.decoder_conv(decoded)
         
         return mean, log_var, z, decoded
-
-# class VAE(nn.Module):
-#     def __init__(self, cfg_obj):
-#         super(VAE, self).__init__()
-#         self.encoder_decoder = VAE_util(cfg_obj)
-
-#     def forward(self, input):
-#         mean, log_var, z, decoded = self.encoder_decoder(input)
-        
-#         return mean, log_var, z, decoded
-
 
 if __name__ == "__main__":
     import numpy as np
@@ -250,8 +123,8 @@ if __name__ == "__main__":
     X = torch.tensor(X)
 
     cfg_obj = {"dataset": {"dataset":"Flowers102"}}
-    model = EncoderDecoder(cfg_obj = cfg_obj)
+    model = VAE(cfg_obj = cfg_obj)
     
-    summary(model, (3, 224, 224))
+    # summary(model, (3, 224, 224))
     print ()
     print (model.forward(X)[0].shape)
