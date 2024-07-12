@@ -15,6 +15,7 @@ def recon_loss(logscale, decoded, dataset, x):
     
         # # commented out, but MSELoss can be computed here. not sure why we overcomplicate things
         # # https://ai.stackexchange.com/questions/27341/in-variational-autoencoders-why-do-people-use-mse-for-the-loss
+        # # https://jamesmccaffrey.wordpress.com/2021/03/18/why-you-can-use-either-mean-squared-error-or-binary-cross-entropy-for-mnist-data/
     
         # mse = torch.nn.MSELoss(reduction='sum')
         # mse_loss = mse(decoded, x)
@@ -48,6 +49,7 @@ def kl_divergence(mean, log_var, z):
 
     # the alternative method is to do it like they do in the paper.
     # kl = 1/2 * (1 + log(std**2) - mean**2 - std((2)).sum(1)
+    kl = -0.5 * torch.sum(1 + log_var - mean**2 - log_var.exp(), dim = 1)
     return kl
 
 def elbo_loss(mean, log_var, z, log_scale, decoded, dataset, x):
@@ -68,7 +70,6 @@ if __name__ == "__main__":
       
     img, label = train[0] 
     
-
     img = img.unsqueeze(0)
     mean, log_var, z, decoded = vae_model(img)
     loss = elbo_loss(mean, log_var, z, vae_model.log_scale, decoded, dataset, img)
