@@ -1,7 +1,9 @@
-from torch.nn import Conv2d, ReLU, MaxPool2d, ConvTranspose2d, BatchNorm2d, AdaptiveAvgPool2d, Linear, Softmax
-import torch.nn as nn
-import torch
 import numpy as np
+import torch
+import torch.nn as nn
+from torch.nn import (AdaptiveAvgPool2d, BatchNorm2d, Conv2d, ConvTranspose2d,
+                      Linear, MaxPool2d, ReLU, Softmax)
+
 
 def reparameterise(mean, log_var):
     std = torch.exp(0.5*log_var)

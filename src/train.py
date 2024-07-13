@@ -1,4 +1,3 @@
-
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -9,7 +8,6 @@ from tqdm import tqdm
 from src.dataset import get_load_data
 from src.loss_function import elbo_loss
 from src.model import VAE
-
 
 def train(train_set, cfg):
            
@@ -49,7 +47,8 @@ def train(train_set, cfg):
             print(f"Epoch {epoch + 1} loss: {sum(overall_loss) / (len(overall_loss)*cfg['train']['batch_size'])}")    
 
     print("training done")
-    torch.save(model, cfg['save_model_path'])
+    dataset = cfg['dataset']['dataset'].lower()
+    torch.save(model.state_dict(), f"{cfg['save_model_path']}_{dataset}.pt")
 
     return model
 
@@ -57,11 +56,11 @@ if __name__ == "__main__":
 
     torch.manual_seed(42)
 
-    cfg = {"save_model_path": "model_weights/vae_mnist.pt",
+    cfg = {"save_model_path": "model_weights/vae",
            'show_model_summary': False, 
            'train': {"epochs": 50, 'lr': 0.001, 'weight_decay': 5e-3, 
                     'batch_size': 4096},
-           'dataset': {"dataset": "MNIST"}}
+           'dataset': {"dataset": "FashionMNIST"}} # FashionMNIST, MNIST, Flowers102
 
     # cfg = {"save_model_path": "model_weights/vae_flowers.pt",
     #        'show_model_summary': False, 
@@ -69,10 +68,6 @@ if __name__ == "__main__":
     #        'dataset': {"dataset": "Flowers102"}}  
 
     # train_set, _ = get_load_data(root = "../data", dataset = cfg['dataset']['dataset'])
-    train_set, _ = get_load_data(root = "/content/data", dataset = cfg['dataset']['dataset'], download = True)
+    train_set, _ = get_load_data(root = "/content/data", dataset = cfg['dataset']['dataset'], download = True) # for colab
     train(train_set = train_set, cfg = cfg)
-
-    # cannot use FashionMNIST because size needs to be 224x224x3 at the very least
-    # train_set, test_set = get_load_data(root = "../data", dataset = "FashionMNIST")
-    # train(epochs = 1, train_set = train_set, in_channels = 1, num_classes = 10)
     
