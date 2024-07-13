@@ -36,39 +36,7 @@ def get_load_data(root = "data", dataset = "FashionMNIST", download = False):
             download=download,
             transform=Compose([Resize((224,224)), ToTensor()])
         )
-    elif dataset == "VOCDetection":
-        training_data = datasets.VOCDetection(
-            root=root,
-            image_set ="train",
-            download=download,
-            transform=Compose([Resize((572, 572)),ToTensor()]),
-            # target_transform = Compose([Resize((227, 227)),ToTensor()])
-        )
 
-        test_data = datasets.VOCDetection(
-            root=root,
-            image_set ="val",
-            download=download,
-            transform=Compose([Resize((572, 572)), ToTensor()]),
-            # target_transform = Compose([Resize((227, 227)),ToTensor()])
-        )
-
-    elif dataset == "VOCSegmentation":
-        training_data = datasets.VOCSegmentation(
-            root=root,
-            image_set ="train",
-            download=download,
-            transform=Compose([Resize((572, 572)),ToTensor()]),
-            target_transform = Compose([Resize((388, 388)),ToTensor()])
-        )
-
-        test_data = datasets.VOCSegmentation(
-            root=root,
-            image_set ="val",
-            download=download,
-            transform=Compose([Resize((572, 572)), ToTensor()]),
-            target_transform = Compose([Resize((388, 388)),ToTensor()])
-        )
     return training_data, test_data
 
 

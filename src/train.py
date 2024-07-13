@@ -1,15 +1,15 @@
-import torch.nn as nn
-from src.model import VAE
-import torch.optim as optim
+
 import torch
-from tqdm import tqdm
+import torch.nn as nn
+import torch.optim as optim
 from torch.utils.data import DataLoader
 from torchsummary import summary
-import hydra
-from omegaconf import DictConfig, OmegaConf
-from src.loss_function import elbo_loss
+from tqdm import tqdm
+
 from src.dataset import get_load_data
-import numpy as np
+from src.loss_function import elbo_loss
+from src.model import VAE
+
 
 def train(train_set, cfg):
            
@@ -17,7 +17,7 @@ def train(train_set, cfg):
 
     model.train()
 
-    optimizer = optim.Adam(model.parameters(), lr=cfg['train']['lr'], weight_decay=cfg['train']['weight_decay'])
+    optimizer = optim.AdamW(model.parameters(), lr=cfg['train']['lr'], weight_decay=cfg['train']['weight_decay'])
 
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -32,18 +32,22 @@ def train(train_set, cfg):
     for epoch in range(cfg['train']['epochs']):
         print (f"Epoch {epoch + 1}:")
         # for i in tqdm(range(X.shape[0])):
+        overall_loss = []
         with tqdm(train_dataloader) as tepoch:
             for imgs, classes in tepoch:
                 imgs = imgs.to(device)
                 
                 mean, log_var, z, decoded = model(imgs)
-                loss = elbo_loss(mean, log_var, z, model.log_scale, decoded, dataset, imgs)
+                loss = elbo_loss(mean, log_var, decoded, imgs)
                 
                 optimizer.zero_grad() 
                 loss.backward()
                 optimizer.step()
+                overall_loss.append(loss.item())
                 tepoch.set_postfix(loss=loss.item())
-        
+                
+            print(f"Epoch {epoch + 1} loss: {sum(overall_loss) / len(overall_loss)}")    
+
     print("training done")
     torch.save(model, cfg['save_model_path'])
 
@@ -53,17 +57,18 @@ if __name__ == "__main__":
 
     torch.manual_seed(42)
 
-    cfg = {"save_model_path": "model_weights/vae_fmnist.pt",
+    cfg = {"save_model_path": "model_weights/vae_mnist.pt",
            'show_model_summary': False, 
            'train': {"epochs": 50, 'lr': 0.001, 'weight_decay': 5e-3},
-           'dataset': {"dataset": "FashionMNIST"}}
+           'dataset': {"dataset": "MNIST"}}
 
     # cfg = {"save_model_path": "model_weights/vae_flowers.pt",
     #        'show_model_summary': False, 
     #        'train': {"epochs": 3, 'lr': 0.005, 'weight_decay': 5e-3},
     #        'dataset': {"dataset": "Flowers102"}}  
 
-    train_set, _ = get_load_data(root = "../data", dataset = cfg['dataset']['dataset'])
+    # train_set, _ = get_load_data(root = "../data", dataset = cfg['dataset']['dataset'])
+    train_set, _ = get_load_data(root = "/content/data", dataset = cfg['dataset']['dataset'], download = True)
     train(train_set = train_set, cfg = cfg)
 
     # cannot use FashionMNIST because size needs to be 224x224x3 at the very least

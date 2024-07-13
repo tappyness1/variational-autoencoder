@@ -6,7 +6,7 @@ import numpy as np
 def reparameterise(mean, log_var):
     std = torch.exp(0.5*log_var)
     eps = torch.randn_like(std)
-    return mean + eps*std
+    return mean + std*eps
 
 class VAE(nn.Module):
     def __init__(self, cfg_obj):
@@ -36,25 +36,26 @@ class VAE(nn.Module):
         return self.encoder_decoder(input)
     
 class EncoderDecoderFMNIST(nn.Module):
-    def __init__(self):
+    def __init__(self, encoder_params=[28*28, 512, 256], latent_dim = 128):
         super(EncoderDecoderFMNIST, self).__init__()
         relu = nn.ReLU()
-        encoder_params = [28*28, 64, 32, 16, 8, 4, 2]
+        # encoder_params = [28*28, 512, 256, 128, 64, 32, 16]
         self.encoder = nn.Sequential()
         for i in range(len(encoder_params)-1):
             self.encoder.add_module(f"encoder_{i}", nn.Linear(encoder_params[i], encoder_params[i+1]))
             self.encoder.add_module(f"encoder_relu_{i}", relu)
-
         self.decoder = nn.Sequential()
+        self.decoder.add_module(f"decoder", nn.Linear(latent_dim, encoder_params[-1]))
         for i in range(len(encoder_params)-1, 0, -1):
             self.decoder.add_module(f"decoder_{i}", nn.Linear(encoder_params[i], encoder_params[i-1]))
             self.decoder.add_module(f"decoder_relu_{i}", relu)
 
-        self.FC_mean = nn.Linear(2 , 2)
-        self.FC_logvar = nn.Linear(2 , 2)
+        self.FC_mean = nn.Linear(encoder_params[-1], latent_dim)
+        self.FC_logvar = nn.Linear(encoder_params[-1], latent_dim)
 
     def forward(self, input):
-        input = input.reshape(-1, 28*28)
+        # input = input.reshape(-1, 28*28)
+        input = input.view(-1, 28*28)
         encoded = self.encoder(input)
         mean = self.FC_mean(encoded)
         log_var = self.FC_logvar(encoded)
@@ -63,6 +64,7 @@ class EncoderDecoderFMNIST(nn.Module):
 
         decoded = self.decoder(z)
         decoded = decoded.reshape(-1, 1, 28, 28)
+        decoded = decoded.view(-1,1,28,28)
         return mean, log_var, z, decoded
     
 class EncoderDecoderFlowers102(nn.Module):

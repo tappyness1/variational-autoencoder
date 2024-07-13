@@ -6,17 +6,19 @@ def recon_loss(decoded, x):
     mse = torch.nn.MSELoss(reduction='sum')
     return mse(decoded, x)
 
-def kl_divergence(mean, log_var, z):
+    # bce = torch.nn.BCEWithLogitsLoss(reduction='sum')
+    # return bce(decoded, x)
+
+def kl_divergence(mean, log_var):
     # do it like they do in the paper.
     kl = -0.5 * torch.sum(1 + log_var - mean**2 - log_var.exp(), dim = 1)
     return kl
 
-def elbo_loss(mean, log_var, z, log_scale, decoded, dataset, x):
-    r_loss = recon_loss(log_scale, decoded, dataset, x)
-    kl_loss = kl_divergence(mean, log_var, z)
+def elbo_loss(mean, log_var, decoded, x):
+    r_loss = recon_loss(decoded, x)
+    kl_loss = kl_divergence(mean, log_var)
 
-    # return (kl_loss + r_loss).mean() # do I need to take the mean?
-    return kl_loss + r_loss
+    return (kl_loss + r_loss).mean()
 
 if __name__ == "__main__":
     from src.model import VAE
