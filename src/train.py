@@ -26,7 +26,7 @@ def train(train_set, cfg):
     if cfg['show_model_summary']:
         summary(model, (3,224,224))
 
-    train_dataloader = DataLoader(train_set, batch_size=4096, shuffle = True)
+    train_dataloader = DataLoader(train_set, batch_size=cfg['train']['batch_size'], shuffle = True)
     dataset = cfg['dataset']['dataset']
     
     for epoch in range(cfg['train']['epochs']):
@@ -46,7 +46,7 @@ def train(train_set, cfg):
                 overall_loss.append(loss.item())
                 tepoch.set_postfix(loss=loss.item())
                 
-            print(f"Epoch {epoch + 1} loss: {sum(overall_loss) / len(overall_loss)}")    
+            print(f"Epoch {epoch + 1} loss: {sum(overall_loss) / (len(overall_loss)*cfg['train']['batch_size'])}")    
 
     print("training done")
     torch.save(model, cfg['save_model_path'])
@@ -59,7 +59,8 @@ if __name__ == "__main__":
 
     cfg = {"save_model_path": "model_weights/vae_mnist.pt",
            'show_model_summary': False, 
-           'train': {"epochs": 50, 'lr': 0.001, 'weight_decay': 5e-3},
+           'train': {"epochs": 50, 'lr': 0.001, 'weight_decay': 5e-3, 
+                    'batch_size': 4096},
            'dataset': {"dataset": "MNIST"}}
 
     # cfg = {"save_model_path": "model_weights/vae_flowers.pt",

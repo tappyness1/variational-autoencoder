@@ -21,6 +21,21 @@ def get_load_data(root = "data", dataset = "FashionMNIST", download = False):
             download=download,
             transform=ToTensor()
         )
+
+    elif dataset == "MNIST":
+        training_data = datasets.MNIST(
+            root=root,
+            train=True,
+            download=download,
+            transform=ToTensor()
+        )
+
+        test_data = datasets.MNIST(
+            root=root,
+            train=False,
+            download=download,
+            transform=ToTensor()
+        )
     
     elif dataset == "Flowers102":
         training_data = datasets.Flowers102(

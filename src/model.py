@@ -20,8 +20,8 @@ class VAE(nn.Module):
         # for numerical stability, we will obtain the log variance instead
         # read more here - https://stats.stackexchange.com/questions/353220/why-in-variational-auto-encoder-gaussian-variational-family-we-model-log-sig
 
-        if cfg_obj["dataset"]['dataset'] == "FashionMNIST":
-            self.encoder_decoder = EncoderDecoderFMNIST()
+        if cfg_obj["dataset"]['dataset'] in ["FashionMNIST", "MNIST"]:
+            self.encoder_decoder = EncoderDecoderMNIST()
 
         if cfg_obj["dataset"]['dataset'] == "Flowers102":
             # in the case of Flowers102, which are 3x224x224 images, we do conv layers then flatten
@@ -35,9 +35,9 @@ class VAE(nn.Module):
 
         return self.encoder_decoder(input)
     
-class EncoderDecoderFMNIST(nn.Module):
+class EncoderDecoderMNIST(nn.Module):
     def __init__(self, encoder_params=[28*28, 512, 256], latent_dim = 128):
-        super(EncoderDecoderFMNIST, self).__init__()
+        super(EncoderDecoderMNIST, self).__init__()
         relu = nn.ReLU()
         # encoder_params = [28*28, 512, 256, 128, 64, 32, 16]
         self.encoder = nn.Sequential()

@@ -11,14 +11,15 @@ def recon_loss(decoded, x):
 
 def kl_divergence(mean, log_var):
     # do it like they do in the paper.
-    kl = -0.5 * torch.sum(1 + log_var - mean**2 - log_var.exp(), dim = 1)
+    kl = -0.5 * torch.sum(1 + log_var - mean**2 - log_var.exp())
     return kl
 
 def elbo_loss(mean, log_var, decoded, x):
     r_loss = recon_loss(decoded, x)
+
     kl_loss = kl_divergence(mean, log_var)
 
-    return (kl_loss + r_loss).mean()
+    return kl_loss + r_loss
 
 if __name__ == "__main__":
     from src.model import VAE
