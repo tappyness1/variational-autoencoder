@@ -56,18 +56,17 @@ if __name__ == "__main__":
 
     torch.manual_seed(42)
 
+    # cfg = {"save_model_path": "model_weights/vae",
+    #        'show_model_summary': False, 
+    #        'train': {"epochs": 50, 'lr': 0.001, 'weight_decay': 5e-3, 
+    #                 'batch_size': 4096},
+    #        'dataset': {"dataset": "FashionMNIST"}} # FashionMNIST, MNIST
+
     cfg = {"save_model_path": "model_weights/vae",
            'show_model_summary': False, 
-           'train': {"epochs": 50, 'lr': 0.001, 'weight_decay': 5e-3, 
-                    'batch_size': 4096},
-           'dataset': {"dataset": "FashionMNIST"}} # FashionMNIST, MNIST, Flowers102
-
-    # cfg = {"save_model_path": "model_weights/vae_flowers.pt",
-    #        'show_model_summary': False, 
-    #        'train': {"epochs": 3, 'lr': 0.005, 'weight_decay': 5e-3},
-    #        'dataset': {"dataset": "Flowers102"}}  
+           'train': {"epochs": 50, 'lr': 0.001, 'weight_decay': 5e-3, 'batch_size': 8},
+           'dataset': {"dataset": "Flowers102"}}  
 
     # train_set, _ = get_load_data(root = "../data", dataset = cfg['dataset']['dataset'])
     train_set, _ = get_load_data(root = "/content/data", dataset = cfg['dataset']['dataset'], download = True) # for colab
-    train(train_set = train_set, cfg = cfg)
-    
+    train(train_set = train_set, cfg = cfg)    

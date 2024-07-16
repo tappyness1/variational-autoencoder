@@ -3,6 +3,7 @@ import torch
 import torch.nn as nn
 from torch.nn import (AdaptiveAvgPool2d, BatchNorm2d, Conv2d, ConvTranspose2d,
                       Linear, MaxPool2d, ReLU, Softmax)
+from src.conv_size_calc import get_output_size
 
 
 def reparameterise(mean, log_var):
@@ -12,7 +13,7 @@ def reparameterise(mean, log_var):
 
 class VAE(nn.Module):
     def __init__(self, cfg_obj):
-        super(VAE, self).__init__()
+        super().__init__()
         self.cfg_obj = cfg_obj
 
         # get the encoder and decoder
@@ -70,16 +71,19 @@ class EncoderDecoderMNIST(nn.Module):
         return mean, log_var, z, decoded
     
 class EncoderDecoderFlowers102(nn.Module):
-    def __init__(self) -> None:
+    def __init__(self, img_size = 224) -> None:
         super(EncoderDecoderFlowers102, self).__init__()
         relu = nn.ReLU()
-
+        stride = 2
+        out_paddings = [1,0,0]
         self.encoder = nn.Sequential()
-        encoder_conv_params = [3,64,32,16,8,4,2]
-        encoder_lin_params = [89888, 1024, 20]
+        encoder_conv_params = [3,32,64]
+        self.encoder_conv_params = encoder_conv_params 
+        self.encoder_out_size = get_output_size(img_size, 3, stride = stride, num_times= len(encoder_conv_params)-1)
+        encoder_lin_params = [self.encoder_out_size*self.encoder_out_size*encoder_conv_params[-1], 1024, 512]
 
         for i in range(len(encoder_conv_params)-1):
-            self.encoder.add_module(f"encoder_{i}", nn.Conv2d(encoder_conv_params[i], encoder_conv_params[i+1], 3))
+            self.encoder.add_module(f"encoder_{i}", nn.Conv2d(encoder_conv_params[i], encoder_conv_params[i+1], 3, stride = 2))
             self.encoder.add_module(f"encoder_relu_{i}", relu)
 
         self.encoder.add_module("flatten", nn.Flatten())
@@ -88,8 +92,8 @@ class EncoderDecoderFlowers102(nn.Module):
             self.encoder.add_module(f"encoder_lin_{i}", nn.Linear(encoder_lin_params[i], encoder_lin_params[i+1]))
             self.encoder.add_module(f"encoder_lin_relu_{i}", relu)
 
-        self.FC_mean = nn.Linear(20 , 20)
-        self.FC_logvar = nn.Linear(20 , 20)
+        self.FC_mean = nn.Linear(512 , 512)
+        self.FC_logvar = nn.Linear(512 , 512)
 
         self.decoder_linear = nn.Sequential()
         for i in range(len(encoder_lin_params)-1, 0, -1):
@@ -98,7 +102,7 @@ class EncoderDecoderFlowers102(nn.Module):
         
         self.decoder_conv = nn.Sequential()
         for i in range(len(encoder_conv_params)-1, 0, -1):
-            self.decoder_conv.add_module(f"decoder_{i}", nn.ConvTranspose2d(encoder_conv_params[i], encoder_conv_params[i-1], 3))
+            self.decoder_conv.add_module(f"decoder_{i}", nn.ConvTranspose2d(encoder_conv_params[i], encoder_conv_params[i-1], 3, stride = stride, output_padding= out_paddings[i-1]))
             self.decoder_conv.add_module(f"decoder_relu_{i}", relu)
 
     def forward(self, input):        
@@ -109,7 +113,7 @@ class EncoderDecoderFlowers102(nn.Module):
         z = reparameterise(mean, log_var)
 
         decoded = self.decoder_linear(z)
-        decoded = decoded.reshape(-1, 2, 212, 212)
+        decoded = decoded.reshape(-1, self.encoder_conv_params[-1], self.encoder_out_size, self.encoder_out_size)
         decoded = self.decoder_conv(decoded)
         
         return mean, log_var, z, decoded

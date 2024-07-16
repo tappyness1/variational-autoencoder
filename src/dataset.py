@@ -38,18 +38,19 @@ def get_load_data(root = "data", dataset = "FashionMNIST", download = False):
         )
     
     elif dataset == "Flowers102":
+        resize = 224
         training_data = datasets.Flowers102(
             root=root,
             split="test",
             download=download,
-            transform=Compose([Resize((224,224)), ToTensor()]) 
+            transform=Compose([Resize((resize,resize)), ToTensor()]) 
         )
 
         test_data = datasets.Flowers102(
             root=root,
             split = "train",
             download=download,
-            transform=Compose([Resize((224,224)), ToTensor()])
+            transform=Compose([Resize((resize,resize)), ToTensor()])
         )
 
     return training_data, test_data
