@@ -59,7 +59,7 @@ def train(train_set, cfg):
                 overall_loss.append(loss.item())
                 tepoch.set_postfix(loss=loss.item())
                 
-            print(f"Epoch {epoch + 1} loss: {sum(overall_loss) / (len(overall_loss)*cfg['train']['batch_size'])}")
+            print(f"Epoch {epoch} loss: {sum(overall_loss) / (len(overall_loss)*cfg['train']['batch_size'])}")
 
         if epoch % cfg['train']['save_checkpoint_interval'] == 0:
             torch.save(model.state_dict(), f"{cfg['save_model_path']}-{dataset_name}-epochs-{epoch}.pt")
@@ -83,9 +83,9 @@ if __name__ == "__main__":
     cfg = {"save_model_path": "model_weights/vae",
            'show_model_summary': False, 
            'train': {"epochs": 100, 'lr': 0.001, 'weight_decay': 5e-3, 'batch_size': 8, 
-                     'continue_training': True, 
-                     'save_checkpoint_interval': 5,
-                     'weights_path': "model_weights/vae-flowers102-epochs-50.pt"},
+                     'continue_training': False, 
+                     'save_checkpoint_interval': 10,
+                     'weights_path': "model_weights/vae-flowers102-epochs-20.pt"},
            'dataset': {"dataset": "Flowers102"}}  
 
     # train_set, _ = get_load_data(root = "../data", dataset = cfg['dataset']['dataset'])
